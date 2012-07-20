@@ -7,6 +7,7 @@ Versions
 ========
 
 Moodle 1.9 : Branch MOODLE_19_STABLE
+
 Moodle 2.0 : Not evaluated yet. There might be no need to port this block features to Moodle 2.
 
 Features
