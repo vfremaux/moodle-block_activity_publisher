@@ -14,20 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * @package   block_activity_publisher
- * @category  blocks
- * @copyright 2010 Dongsheng Cai <dongsheng@moodle.com>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-require('../../config.php');
-require_once($CFG->dirroot.'/blocks/activity_publisher/lib/activity_publisher.class.php');
+require_once('../../config.php');
+require_once('lib/activity_publisher.class.php');
 
 $contextid = required_param('contextid', PARAM_INT);
 $courseid = required_param('course', PARAM_INT);
-$fileid = optional_param('fileid', null, PARAM_INT);
-$sharingcontext = optional_param('sharingcontext', null, PARAM_INT);
+$fileid   = optional_param('fileid', null, PARAM_INT);
+$sharingcontext   = optional_param('sharingcontext', null, PARAM_INT);
 
 $block_context = context::instance_by_id($contextid);
 
@@ -41,7 +34,7 @@ require_course_login($course);
 
 // Header and page start.
 
-$url = new moodle_url('/blocks/activity_publisher/publish.php');
+$url = $CFG->wwwroot.'/blocks/activity_publisher/publish.php';
 $PAGE->set_url($url);
 $PAGE->set_pagelayout('standard');
 $PAGE->set_context($block_context);

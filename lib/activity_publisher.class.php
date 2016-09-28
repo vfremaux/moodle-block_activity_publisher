@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-defined('MOODLE_INTERNAL') || die;
-
 /**
  * activity publisher class, encapsulate the entry points for the activity backup
  * process.
@@ -95,8 +93,8 @@ class activity_publisher {
             $fs = get_file_storage();
 
             $newfile = new stdClass();
-            $newfile->component = 'block_activity_publisher';
-            $newfile->filearea = 'activity_backup';
+            $newfile->component = "block_activity_publisher";
+            $newfile->filearea = "activity_backup";
             $block_context = context_block::instance($blockid);
             $newfile->contextid = $block_context->id;
 
@@ -145,12 +143,10 @@ class activity_publisher {
     public static function load_course_activities_select($course_id) {
         global $CFG;
 
-        $config = get_config('block_activity_publisher');
-
-        if (empty($config->unable_mods)) {
-            set_config('unable_mods', '', 'block_activity_publisher');
+        if (empty($CFG->activity_publisher_unable_mods)) {
+            set_config('activity_publisher_unable_mods', '');
         }
-        $unabled_mods = explode(',', $config->unable_mods);
+        $unabled_mods = explode(',', $CFG->activity_publisher_unable_mods);
         $modules = self::get_course_mods($course_id);
 
         $select = '<select name="mod" >';
