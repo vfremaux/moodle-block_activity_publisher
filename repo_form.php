@@ -32,12 +32,8 @@ class activity_restore_form extends moodleform {
 
         $mform =& $this->_form;
         $contextid = $this->_customdata['contextid'];
-
         $mform->addElement('hidden', 'contextid', $contextid);
-        $mform->setType('contextid', PARAM_INT);
-
         $mform->addElement('filepicker', 'backupfile', get_string('files'),null, array('maxfiles' => 1, 'maxbytes' => $COURSE->maxbytes, 'accepted_types' => array('.mbz')));
-
         $submit_string = get_string('restore');
         $this->add_action_buttons(false, $submit_string);
     }
