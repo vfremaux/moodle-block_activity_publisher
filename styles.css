@@ -1,0 +1,48 @@
+.block_activity_publisher .content{
+    background-color:#fee !important;
+    line-height:30px;
+}
+
+#content-cont{
+min-height:400px;
+}
+
+#summary-cont{
+    background-color: #F8F8F8;
+    border: 1px solid #C8C8C8;
+    margin: auto;
+    padding: 7px;
+    width: 70%;
+}
+
+#summary-cont #title{
+    background-color: #999999;
+    color: white;
+    padding: 3px;
+}
+
+#summary-cont #summary-table{
+}
+
+#summary-cont #summary-table td.title{
+    font-size: 11px;
+    font-weight: bold;
+}
+
+#summary-cont #download-btn{
+    text-align:center;
+}
+
+.submit-disabled{
+    opacity:0.4;
+    filter:alpha(opacity=40);
+}
+
+.success-message{
+    background-color: #F0FDDF;
+    border: 3px solid #F8F8F8;
+    color: #333333;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px;
+}

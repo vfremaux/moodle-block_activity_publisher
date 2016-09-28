@@ -1,0 +1,13 @@
+CODING
+1. Do not call static function on an instance. Use class name : $ap:: => activity_publisher:: (breaks some PHP versions)
+2. Avoid using _ in simple var names (cultural moodle naming)
+3. Change non standard :addtocourse cap back to addinstance. Remove can_add_to (old 1.9 API)
+4. Static strings moved to lang files
+5. Replace error() function as print_error(), move error strings to lang 
+6. Removing unnecessary blank lines (no more than one blank line)
+7. Use as few doublequote (parsed) string as possible. Use simple quotes for real string constants
+
+FUNCTIONAL
+1. Inverted module control from "allow" to "unable"
+2. Publishing : out of target implementation. Publish needs adding the resource entry to library and not just making a new file record. This implies calling the "add sharedresource" process as sub process
+3. Is_published() query is also erroneous condition : needs check the sharedresource entry exists in library
