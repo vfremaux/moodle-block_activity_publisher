@@ -14,23 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Version details.
- *
- * @package     block_activity_publisher
- * @category    blocks
- * @author      Valery Fremaux <valery.fremaux@gmail.com>
- * @copyright   2015 Valery Fremaux (http://www.mylearningfactory.com)
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2014071200;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2015111000;        // Requires this Moodle version.
-$plugin->component = 'block_activity_publisher'; // Full name of the plugin (used for diagnostics).
-$plugin->release = '3.0.0 (Build 2014071200)';
+$plugin->version   = 2014071200;        // The current plugin version (Date: YYYYMMDDXX)
+$plugin->requires  = 2012112900;        // Requires this Moodle version
+$plugin->component = 'block_activity_publisher'; // Full name of the plugin (used for diagnostics)
+$plugin->release = '2.6.0 (Build 2014071200)'; // Full name of the plugin (used for diagnostics)
 $plugin->maturity = MATURITY_BETA;
 
 // Non moodle attributes.
-$plugin->codeincrement = '3.0.0001';
+$plugin->codeincrement = '3.1.0000';
