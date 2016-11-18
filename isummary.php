@@ -1,59 +1,68 @@
 <?php
-    /**
-    * import summery page, first step page in the activity import process.
-    * @author Wafa Adham, Adham Inc.
-    * @version 1.0
-    */
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-    require_once('../../config.php');
+/**
+* import summery page, first step page in the activity import process.
+* @author Wafa Adham, Adham Inc.
+* @version 1.0
+*/
 
-     
-    $course_id = required_param('course',PARAM_INT); 
+require('../../config.php');
 
-    if(!$course = get_record('course', 'id', $course_id) ){
-        error('invalid course');
-    }
+$course_id = required_param('course',PARAM_INT); 
 
-    require_login($course_id);
+if (!$course = $DB->get_record('course', array('id' => $course_id))) {
+    print_error('coursemisconf');
+}
 
-    if (! $site = get_site()) {
-        redirect($CFG->wwwroot .'/'. $CFG->admin .'/index.php');
-    }
+require_login($course_id);
 
+if (! $site = get_site()) {
+    redirect(new moodle_url('/admin/index.php'));
+}
 
-    //print_header(strip_tags($site->fullname), $site->fullname, '', '', '',true, '', '');    
+echo $OUTPUT->header();
+echo '<div id="content-cont">';
 
-    print('<div id="content-cont">');
-        
-    print_heading("Activity Publisher");
-    print('<div id="summary-cont">');
-    print('<div id="title">'.get_string('import', 'block_activity_publisher').'</div>');
+echo $OUTPUT->heading(get_string('pluginname', 'block_activity_publisher'));
+echo '<div id="summary-cont">';
+echo '<div id="title">'.get_string('import', 'block_activity_publisher').'</div>';
 
-    print('<form enctype="multipart/form-data" method="post" action="import.php">
-    <table id="summary-table" cellpadding="5" cellspacing="5">');
+echo '<form enctype="multipart/form-data" method="post" action="import.php">
+<table id="summary-table" cellpadding="5" cellspacing="5">';
 
-    print('<tr>');
-    print('<td class="title">Course Name</td>');
-    print('<td>'.$course->fullname.'</td>');
-    print('</tr>');
+echo '<tr>';
+echo '<td class="title">'.get_string('coursename', 'block_activity_publisher').'</td>';
+echo '<td>'.$course->fullname.'</td>';
+echo '</tr>';
 
-    print('<tr>');
-    print('<td class="title">Select Activity :</td>');
-    print('<td><input type="file" name="upfile" id="upfile" /></td>');
-    print('</tr>');
-    print('</table>');
+echo '<tr>';
+echo '<td class="title">Select Activity :</td>';
+echo '<td><input type="file" name="upfile" id="upfile" /></td>';
+echo '</tr>';
+echo '</table>';
 
+echo '<div id="download-btn">';
 
-    print('<div id="download-btn">');
+echo '<input type="hidden" value="'.$course_id.'" name="cid"/><input type="submit" value="Import" />';
 
-    print('<input type="hidden" value="'.$course_id.'" name="cid"/><input type="submit" value="Import" />');
+echo '</form></div>';
 
-    print('</form></div>');
+echo '</div>';
 
-    print('</div>');
+print('</div>');
 
-
-    print('</div>');     
-        
-    $OUTPUT->print_footer();    
-?>
+$OUTPUT->print_footer();

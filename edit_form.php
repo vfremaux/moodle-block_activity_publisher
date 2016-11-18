@@ -18,9 +18,11 @@
  * Form for editing Blog tags block instances.
  *
  * @package   block_activity_publisher
+ * @category  blocks
  * @copyright 2012 Valery Fremaux
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+defined('MOODLE_INTERNAL') || die;
 
 /**
  * Form for editing Blog tags block instances.
