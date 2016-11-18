@@ -14,30 +14,29 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-defined('MOODLE_INTERNAL') || die;
-
 /**
  * @package   block_activity_publisher
  * @category  blocks
  * @copyright 2010 Dongsheng Cai <dongsheng@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+defined('MOODLE_INTERNAL') || die;
 
 class block_activity_publisher extends block_base {
 
-    function init() {
+    public function init() {
         $this->title = get_string('activity_publisher', 'block_activity_publisher');
     }
 
-    function applicable_formats() {
+    public function applicable_formats() {
         return array('all' => false, 'course-view' => true, 'my' => false);
     }
 
-    function instance_allow_multiple() {
+    public function instance_allow_multiple() {
         return false;
     }
 
-    function get_content() {
+    public function get_content() {
         global $CFG, $USER, $COURSE;
 
         if ($COURSE->id <= SITEID) {

@@ -14,14 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-defined('MOODLE_INTERNAL') || die;
-
 /**
  * @package   block_activity_publisher
  * @category  blocks
  * @copyright 2010 Dongsheng Cai <dongsheng@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+defined('MOODLE_INTERNAL') || die;
 
 /**
 *  Class that wraps the result of a backup operation.
@@ -32,6 +31,6 @@ class backup_result {
 
     public $download_link;
 
-    function __construct() {
+    public function __construct() {
     }
 }

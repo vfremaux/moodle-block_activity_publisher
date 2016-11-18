@@ -64,7 +64,13 @@ unset ($SESSION->backupprefs);
 
 // get the module object;
 $module = $DB->get_record('modules', array('id' => $modid));
-    
+$pluginmanager = core_plugin_manager::instance();
+$plugininfo = $pluginmanager->get_plugin_info('mod_'.$module->name);
+
+if (empty($plugininfo)) {
+    print_error(get_string('errorplugin', 'block_activity_publisher'));
+}
+
 //we have all the infos , now we start
 $backupfiles = activity_publisher::course_backup_activities($course, $instances, $blockid);
 
@@ -96,15 +102,15 @@ foreach($backupfiles as $cmid => $bf){
         // Description
         if (isset($instance->description)) {
             $description = $instance->description;
-        } elseif (isset($instance->summary)) {
+        } else if (isset($instance->summary)) {
             $description = $instance->summary;
-        } elseif (isset($instance->intro)) {
+        } else if (isset($instance->intro)) {
             $description = $instance->intro;
         }
         sharedresource_append_metadata_elements($backupmetadataelements, '1_4:0_0', $description, $CFG->pluginchoice);
 
         // Keywords
-        sharedresource_append_metadata_elements($backupmetadataelements, '1_5:0_0', get_string('pluginname', $module->name), $CFG->pluginchoice);
+        sharedresource_append_metadata_elements($backupmetadataelements, '1_5:0_0', $plugininfo->displayname, $CFG->pluginchoice);
 
         // Structure.
         sharedresource_append_metadata_elements($backupmetadataelements, '1_7:0_0', 'atomic', $CFG->pluginchoice);
@@ -121,16 +127,16 @@ foreach($backupfiles as $cmid => $bf){
         sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_3:0_0_0_0', $CFG->version, $CFG->pluginchoice);
         sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_4:0_0_0_0', $CFG->version, $CFG->pluginchoice);
         sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_1:0_0_1_0', 'module', $CFG->pluginchoice);
-        sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_2:0_0_1_0', $module->name, $CFG->pluginchoice);
-        sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_3:0_0_1_0', $module->version, $CFG->pluginchoice);
-        sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_4:0_0_1_0', $module->version, $CFG->pluginchoice);
+        sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_2:0_0_1_0', $plugininfo->name, $CFG->pluginchoice);
+        sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_3:0_0_1_0', $plugininfo->versiondb, $CFG->pluginchoice);
+        sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_4:0_0_1_0', $plugininfo->versiondb, $CFG->pluginchoice);
 
         sharedresource_append_metadata_elements($backupmetadataelements, '4_5:0_0', get_string('installation', 'block_activity_publisher', get_string('pluginname', $module->name)), $CFG->pluginchoice);
         sharedresource_append_metadata_elements($backupmetadataelements, '4_6:0_0', get_string('platformrequirement', 'block_activity_publisher'), $CFG->pluginchoice);
 
         if (in_array($module->name, array('resource', 'sharedresource', 'directory', 'label', 'customlabel'))){
             sharedresource_append_metadata_elements($backupmetadataelements, '5_1:0_0', 'expositive', $CFG->pluginchoice);
-        } elseif (in_array($module->name, array('url'))){
+        } else if (in_array($module->name, array('url'))){
             sharedresource_append_metadata_elements($backupmetadataelements, '5_1:0_0', 'mixed', $CFG->pluginchoice);
         } else {
             sharedresource_append_metadata_elements($backupmetadataelements, '5_1:0_0', 'active', $CFG->pluginchoice);

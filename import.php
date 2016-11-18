@@ -15,8 +15,6 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 require('../../config.php');
-require_once("backup/lib.php");
-require_once("backup/restorelib.php");
 require_once("$CFG->dirroot/backup/lib.php");
 require_once("$CFG->dirroot/backup/restorelib.php");
 require_once("$CFG->libdir/blocklib.php");
