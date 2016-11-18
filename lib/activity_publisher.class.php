@@ -14,14 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-defined('MOODLE_INTERNAL') || die;
-
 /**
  * activity publisher class, encapsulate the entry points for the activity backup
  * process.
  * @author Wafa Adham, Adham Inc.
  * @version 1.0
  */
+defined('MOODLE_INTERNAL') || die;
 
 // Check if this function already loaded , this means the backup lib already included.
 

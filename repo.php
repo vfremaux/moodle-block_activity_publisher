@@ -103,7 +103,7 @@ if ($publish == 1) {
     echo $OUTPUT->box_start('success-message');
     echo $OUTPUT->notification(get_string('successful', 'block_activity_publisher'));
     echo $OUTPUT->box_end();
-} elseif ($publish == -1) {
+} else if ($publish == -1) {
     echo $OUTPUT->box_start('success-message');
     echo $OUTPUT->notification(get_string('alreadypublished', 'block_activity_publisher'));
     echo $OUTPUT->box_end();
@@ -116,9 +116,9 @@ if ($context->contextlevel == CONTEXT_BLOCK) {
     $user_context = context_user::instance($USER->id);
     $treeview_options['filecontext'] = $context;
     $treeview_options['currentcontext'] = $context;
-    $treeview_options['component']   = 'block_activity_publisher';
-    $treeview_options['context']     = $context;
-    $treeview_options['filearea']    = 'activity_backup';
+    $treeview_options['component'] = 'block_activity_publisher';
+    $treeview_options['context'] = $context;
+    $treeview_options['filearea'] = 'activity_backup';
   
     $renderer = $PAGE->get_renderer('block_activity_publisher');
     echo $renderer->backup_files_viewer($treeview_options);

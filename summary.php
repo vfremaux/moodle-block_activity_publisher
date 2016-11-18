@@ -49,7 +49,7 @@ if (!$site = get_site()) {
 
 $block_context = context::instance_by_id($contextid);
 
-// header and page start
+// Header and page start.
 $params = array('course' => $courseid, 'mod' => $modid, 'contextid' => $contextid, 'bid' => $blockid);
 $url = new moodle_url('/blocks/activity_publisher/summary.php', $params);
 $PAGE->set_url($url);

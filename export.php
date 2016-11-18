@@ -102,9 +102,9 @@ foreach($backupfiles as $cmid => $bf){
         // Description
         if (isset($instance->description)) {
             $description = $instance->description;
-        } elseif (isset($instance->summary)) {
+        } else if (isset($instance->summary)) {
             $description = $instance->summary;
-        } elseif (isset($instance->intro)) {
+        } else if (isset($instance->intro)) {
             $description = $instance->intro;
         }
         sharedresource_append_metadata_elements($backupmetadataelements, '1_4:0_0', $description, $CFG->pluginchoice);
@@ -136,7 +136,7 @@ foreach($backupfiles as $cmid => $bf){
 
         if (in_array($module->name, array('resource', 'sharedresource', 'directory', 'label', 'customlabel'))){
             sharedresource_append_metadata_elements($backupmetadataelements, '5_1:0_0', 'expositive', $CFG->pluginchoice);
-        } elseif (in_array($module->name, array('url'))){
+        } else if (in_array($module->name, array('url'))){
             sharedresource_append_metadata_elements($backupmetadataelements, '5_1:0_0', 'mixed', $CFG->pluginchoice);
         } else {
             sharedresource_append_metadata_elements($backupmetadataelements, '5_1:0_0', 'active', $CFG->pluginchoice);

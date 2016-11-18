@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-defined('MOODLE_INTERNAL') || die;
-
 /**
  * Manage backup files
  * @package   block_activity_publisher
@@ -23,10 +21,12 @@ defined('MOODLE_INTERNAL') || die;
  * @copyright 2010 Dongsheng Cai <dongsheng@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+defined('MOODLE_INTERNAL') || die;
+
 require_once($CFG->libdir.'/formslib.php');
 
 class backup_files_edit_form extends moodleform {
-    function definition() {
+    public function definition() {
         $mform =& $this->_form;
         $contextid = $this->_customdata['contextid'];
         $options = array('subdirs' => 0, 'maxfiles' => -1, 'accepted_types' => '*', 'return_types' => FILE_INTERNAL | FILE_REFERENCE);

@@ -26,14 +26,14 @@ require('../../config.php');
 require_once($CFG->dirroot.'/backup/restorefile_form.php');
 require_once($CFG->dirroot.'/backup/util/includes/restore_includes.php');
 
-// current context
+// Current context.
 
 $contextid = required_param('contextid', PARAM_INT);
 $filecontextid = optional_param('filecontextid', 0, PARAM_INT);
 $action = optional_param('action', '', PARAM_ALPHA);
 
-// file parameters
-// non js interface may require these parameters
+// File parameters.
+// Non js interface may require these parameters.
 
 $component  = optional_param('component', null, PARAM_COMPONENT);
 $filearea   = optional_param('filearea', null, PARAM_AREA);
@@ -67,7 +67,7 @@ require_capability('moodle/restore:restorecourse', $context);
 
 $browser = get_file_browser();
 
-// check if tmp dir exists
+// Check if tmp dir exists.
 
 $tmpdir = $CFG->tempdir . '/backup';
 if (!check_dir_exists($tmpdir, true, true)) {
@@ -76,7 +76,7 @@ if (!check_dir_exists($tmpdir, true, true)) {
 
 $fs = get_file_storage();
 
-// choose the backup file from backup files tree
+// Choose the backup file from backup files tree.
 
 if ($action == 'choosebackupfile') {
     if ($fileinfo = $fs->get_file($filecontext->id, $component, $filearea, $itemid, $filepath, $filename)) {
