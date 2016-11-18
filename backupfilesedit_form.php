@@ -16,14 +16,17 @@
 
 /**
  * Manage backup files
- * @package   moodlecore
+ * @package   block_activity_publisher
+ * @category  blocks
  * @copyright 2010 Dongsheng Cai <dongsheng@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+defined('MOODLE_INTERNAL') || die;
+
 require_once($CFG->libdir.'/formslib.php');
 
 class backup_files_edit_form extends moodleform {
-    function definition() {
+    public function definition() {
         $mform =& $this->_form;
         $contextid = $this->_customdata['contextid'];
         $options = array('subdirs' => 0, 'maxfiles' => -1, 'accepted_types' => '*', 'return_types' => FILE_INTERNAL | FILE_REFERENCE);

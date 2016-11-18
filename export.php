@@ -1,4 +1,19 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * @package block_activity_publisher
  * export summary 
@@ -7,7 +22,7 @@
  */
 
 require('../../config.php');
-require_once('lib/activity_publisher.class.php');
+require_once($CFG->dirroot.'/blocks/activity_publisher/lib/activity_publisher.class.php');
 
 $modid = required_param('mod',PARAM_INT);
 $blockid = required_param('bid',PARAM_INT);
@@ -25,29 +40,14 @@ if (!$course) {
     print_error('coursemisconf');
 }
 
+// Security.
+
 require_login($id);
 
 //get course context
 $context = context_course::instance($id);
 
-/* if (!empty($course->id)) {
-    if (!has_capability('moodle/site:backup', $context)) {
-        if (empty($to)) {
-            print_error("You need to be a teacher or admin user to use this page.", "$CFG->wwwroot/login/index.php");
-        } else {
-            if (!has_capability('moodle/site:backup', context_course::instance($to))) {
-                print_error("You need to be a teacher or admin user to use this page.", "$CFG->wwwroot/login/index.php");
-            }
-        }
-    }
-} else {
-    if (!has_capability('moodle/site:backup', context_system::instance())) {
-        error("You need to be an admin user to use this page.", "$CFG->wwwroot/login/index.php");
-    }
-}
-*/
-
-print('<ul>');
+echo '<ul>';
 
 if(!defined('BACKUP_SILENTLY')){
     $checkingstr = get_string('checkingconfiguration', 'block_activity_publisher');
@@ -64,11 +64,17 @@ unset ($SESSION->backupprefs);
 
 // get the module object;
 $module = $DB->get_record('modules', array('id' => $modid));
-    
+$pluginmanager = core_plugin_manager::instance();
+$plugininfo = $pluginmanager->get_plugin_info('mod_'.$module->name);
+
+if (empty($plugininfo)) {
+    print_error(get_string('errorplugin', 'block_activity_publisher'));
+}
+
 //we have all the infos , now we start
 $backupfiles = activity_publisher::course_backup_activities($course, $instances, $blockid);
 
-print('</ul>');
+echo '</ul>';
 
 foreach($backupfiles as $cmid => $bf){
     // generic metadata
@@ -80,10 +86,10 @@ foreach($backupfiles as $cmid => $bf){
     $instance = $DB->get_record($module->name, array('id' => $instanceid));
 
     $backupmetadataelements = array();
-    
-    if (preg_match('/lom/', $CFG->pluginchoice)){
 
-        // find here some mapping between moodle objects and some metadata standard defines            
+    if (preg_match('/lom/', $CFG->pluginchoice)) {
+
+        // find here some mapping between moodle objects and some metadata standard defines
         require_once $CFG->dirroot.'/mod/sharedresource/moodlemetadata.php';
 
         // Title
@@ -94,19 +100,19 @@ foreach($backupfiles as $cmid => $bf){
         sharedresource_append_metadata_elements($backupmetadataelements, '1_3:0_0', $lang, $CFG->pluginchoice);
 
         // Description
-        if (isset($instance->description)){ 
+        if (isset($instance->description)) {
             $description = $instance->description;
-        } elseif(isset($instance->summary)){
+        } else if (isset($instance->summary)) {
             $description = $instance->summary;
-        } elseif(isset($instance->intro)){
+        } else if (isset($instance->intro)) {
             $description = $instance->intro;
         }
         sharedresource_append_metadata_elements($backupmetadataelements, '1_4:0_0', $description, $CFG->pluginchoice);
 
         // Keywords
-        sharedresource_append_metadata_elements($backupmetadataelements, '1_5:0_0', get_string('pluginname', $module->name), $CFG->pluginchoice);
+        sharedresource_append_metadata_elements($backupmetadataelements, '1_5:0_0', $plugininfo->displayname, $CFG->pluginchoice);
 
-        // Structure            
+        // Structure.
         sharedresource_append_metadata_elements($backupmetadataelements, '1_7:0_0', 'atomic', $CFG->pluginchoice);
 
         $adddate = $DB->get_field('course_modules', 'added', array('id' => $cmid));
@@ -121,16 +127,16 @@ foreach($backupfiles as $cmid => $bf){
         sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_3:0_0_0_0', $CFG->version, $CFG->pluginchoice);
         sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_4:0_0_0_0', $CFG->version, $CFG->pluginchoice);
         sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_1:0_0_1_0', 'module', $CFG->pluginchoice);
-        sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_2:0_0_1_0', $module->name, $CFG->pluginchoice);
-        sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_3:0_0_1_0', $module->version, $CFG->pluginchoice);
-        sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_4:0_0_1_0', $module->version, $CFG->pluginchoice);
+        sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_2:0_0_1_0', $plugininfo->name, $CFG->pluginchoice);
+        sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_3:0_0_1_0', $plugininfo->versiondb, $CFG->pluginchoice);
+        sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_4:0_0_1_0', $plugininfo->versiondb, $CFG->pluginchoice);
 
         sharedresource_append_metadata_elements($backupmetadataelements, '4_5:0_0', get_string('installation', 'block_activity_publisher', get_string('pluginname', $module->name)), $CFG->pluginchoice);
         sharedresource_append_metadata_elements($backupmetadataelements, '4_6:0_0', get_string('platformrequirement', 'block_activity_publisher'), $CFG->pluginchoice);
 
         if (in_array($module->name, array('resource', 'sharedresource', 'directory', 'label', 'customlabel'))){
             sharedresource_append_metadata_elements($backupmetadataelements, '5_1:0_0', 'expositive', $CFG->pluginchoice);
-        } elseif (in_array($module->name, array('url'))){
+        } else if (in_array($module->name, array('url'))){
             sharedresource_append_metadata_elements($backupmetadataelements, '5_1:0_0', 'mixed', $CFG->pluginchoice);
         } else {
             sharedresource_append_metadata_elements($backupmetadataelements, '5_1:0_0', 'active', $CFG->pluginchoice);

@@ -14,7 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-require_once('lib/activity_publisher.class.php');
+/**
+ * @package   block_activity_publisher
+ * @category  blocks
+ * @copyright 2010 Dongsheng Cai <dongsheng@moodle.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+defined('MOODLE_INTERNAL') || die;
+
+require_once($CFG->dirroot.'/blocks/activity_publisher/lib/activity_publisher.class.php');
 
 class block_activity_publisher_renderer extends plugin_renderer_base {
 

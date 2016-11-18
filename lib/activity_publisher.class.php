@@ -20,6 +20,7 @@
  * @author Wafa Adham, Adham Inc.
  * @version 1.0
  */
+defined('MOODLE_INTERNAL') || die;
 
 // Check if this function already loaded , this means the backup lib already included.
 
@@ -93,8 +94,8 @@ class activity_publisher {
             $fs = get_file_storage();
 
             $newfile = new stdClass();
-            $newfile->component = "block_activity_publisher";
-            $newfile->filearea = "activity_backup";
+            $newfile->component = 'block_activity_publisher';
+            $newfile->filearea = 'activity_backup';
             $block_context = context_block::instance($blockid);
             $newfile->contextid = $block_context->id;
 
@@ -143,10 +144,12 @@ class activity_publisher {
     public static function load_course_activities_select($course_id) {
         global $CFG;
 
-        if (empty($CFG->activity_publisher_unable_mods)) {
-            set_config('activity_publisher_unable_mods', '');
+        $config = get_config('block_activity_publisher');
+
+        if (empty($config->unable_mods)) {
+            set_config('unable_mods', '', 'block_activity_publisher');
         }
-        $unabled_mods = explode(',', $CFG->activity_publisher_unable_mods);
+        $unabled_mods = explode(',', $config->unable_mods);
         $modules = self::get_course_mods($course_id);
 
         $select = '<select name="mod" >';
