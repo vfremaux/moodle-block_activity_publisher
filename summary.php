@@ -1,133 +1,144 @@
 <?php
-    /**
-    * Export summary
-    */
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-    require_once('../../config.php');
+/**
+ * @package   block_activity_publisher
+ * @category  blocks
+ * @copyright 2010 Dongsheng Cai <dongsheng@moodle.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
+ * Export summary
+ */
 
-    $modid = required_param('mod',PARAM_INT);
-    $courseid = required_param('course', PARAM_INT); 
-    $contextid = required_param('contextid', PARAM_INT); 
-    $blockid = required_param('bid', PARAM_INT); 
-    
-    $action = required_param('what', PARAM_TEXT);
-    $PAGE->requires->js('/blocks/activity_publisher/js/block_js.js');
+require('../../config.php');
 
-    if (!$course = $DB->get_record('course', array('id' => $courseid))){
-        print_error('coursemisconf');
-    }
+$modid = required_param('mod',PARAM_INT);
+$courseid = required_param('course', PARAM_INT); 
+$contextid = required_param('contextid', PARAM_INT); 
+$blockid = required_param('bid', PARAM_INT); 
+$action = optional_param('what', '', PARAM_TEXT);
 
-    require_login($courseid);
+$PAGE->requires->js('/blocks/activity_publisher/js/block_js.js');
 
-    if (!$site = get_site()) {
-        redirect(new moodle_url('/'. $CFG->admin .'/index.php'));
-    }
+if (!$course = $DB->get_record('course', array('id' => $courseid))){
+    print_error('coursemisconf');
+}
 
-    $block_context = context::instance_by_id($contextid);
+// Security.
 
-    /// header and page start
-    $url = new moodle_url('/blocks/activity_publisher/summary.php', array('course' => $courseid));
-    $PAGE->set_url($url);
-    $PAGE->set_pagelayout('standard');
-    $PAGE->set_context($block_context);
+require_login($courseid);
+$coursecontext = context_course::instance($courseid);
+require_capability('moodle/course:manageactivities', $coursecontext);
 
-    $PAGE->navigation->add($course->fullname, $CFG->wwwroot.'/course/view.php?id='.$courseid);
-    
-    echo $OUTPUT->header();
-    
-    echo $OUTPUT->heading("Backup Activities");    
+if (!$site = get_site()) {
+    redirect(new moodle_url('/'. $CFG->admin .'/index.php'));
+}
 
-    print('<div id="content-cont">');    
-   // print_heading(get_string('exporting', 'block_activity_publisher'));
+$block_context = context::instance_by_id($contextid);
 
-    $activity = $DB->get_record('modules', array('id'=> $modid));
+// Header and page start.
+$params = array('course' => $courseid, 'mod' => $modid, 'contextid' => $contextid, 'bid' => $blockid);
+$url = new moodle_url('/blocks/activity_publisher/summary.php', $params);
+$PAGE->set_url($url);
+$PAGE->set_pagelayout('standard');
+$PAGE->set_context($block_context);
 
-    //get all activity instances 
-    $activity_instances = get_coursemodules_in_course($activity->name, $course->id);
+$PAGE->navigation->add($course->fullname, new moodle_url('/course/view.php', array('id' => $courseid)));
 
-    $act_name = $activity->name;
-    $query = "
-    	SELECT 
-    		* 
-    	FROM 
-    		{$CFG->prefix}{$act_name} a ,
-    		{$CFG->prefix}course_modules cm 
-		WHERE 
-			cm.module = {$modid} AND 
-			cm.instance = a.id AND 
-			cm.course = {$courseid}
-	";
+echo $OUTPUT->header();
 
-    echo '<form name="exportactivityform" method="post" action="export.php">';
-    echo '<div id="summary-cont">';
-    echo '<div id="title">'.get_string('summary', 'block_activity_publisher').'</div>';
+echo $OUTPUT->heading(get_string('chooseactivities', 'block_activity_publisher'));
 
-    echo '<table id="summary-table" cellpadding="5" cellspacing="5">';
+print('<div id="content-cont">');
+// print_heading(get_string('exporting', 'block_activity_publisher'));
 
-    echo '<tr>';
-    echo '<td class="title">'.get_string('course_name', 'block_activity_publisher').'</td>';
-    echo '<td>'.$course->fullname.'</td>';
-    echo '</tr>';
+$activity = $DB->get_record('modules', array('id'=> $modid));
 
-    echo '<tr>';
-    echo '<td class="title">'.get_string('activity_type','block_activity_publisher').'</td>';
-    echo '<td>'.$activity->name.'</td>';
-    echo '</tr>';
+//get all activity instances 
+$activity_instances = get_coursemodules_in_course($activity->name, $course->id);
 
-    echo '<tr>';
-    echo '<td class="title" valign="top">'.get_string('activity_instances','block_activity_publisher').'</td>';
-    echo '<td>';
+echo '<form name="exportactivityform" method="post" action="export.php">';
+echo '<div id="summary-cont">';
+echo '<div id="title">'.get_string('summary', 'block_activity_publisher').'</div>';
 
-    if($activity_instances){
-        echo '<table width="100%">';
-        //print all instances 
-        $i = 0;
-        foreach($activity_instances as $ai){            
-        	if (!preg_match('/label$/', $activity->name)){
-	        	$name = $ai->name;
-	        } else {
-	        	$name = '<b>'.get_string('modulename', $activity->name).' '.$ai->id.' :</b> '. shorten_text(clean_param($ai->name, PARAM_NOTAGS), 50);
-	        }
-        	if ($action == 'publish'){
-	            echo '<tr><td><input type="checkbox" id="'.$ai->id.'" name="instance[]"  value="'.$ai->id.'" onchange="check_submit_activity(this)" /> </td><td>'.$name.'</td></tr>';    
-	        } else {
-	            echo '<tr><td><input type="radio" name="instance[]"  value="'.$ai->id.'" onchange="check_submit_activity(this)" /> </td><td>'.$name.'</td></tr>';
-	        }
-	        $i++;
+echo '<table id="summary-table" cellpadding="5" cellspacing="5" width="100%">';
+
+echo '<tr>';
+echo '<td class="title">'.get_string('course_name', 'block_activity_publisher').'</td>';
+echo '<td>'.$course->fullname.'</td>';
+echo '</tr>';
+
+echo '<tr>';
+echo '<td class="title">'.get_string('activity_type','block_activity_publisher').'</td>';
+echo '<td>'.$activity->name.'</td>';
+echo '</tr>';
+
+echo '<tr>';
+echo '<td class="title" valign="top">'.get_string('activity_instances','block_activity_publisher').'</td>';
+echo '<td>';
+
+if ($activity_instances) {
+    echo '<table width="100%">';
+    //print all instances 
+    $i = 0;
+    foreach ($activity_instances as $ai) {
+        if (!preg_match('/label$/', $activity->name)) {
+            $name = $ai->name;
+        } else {
+            $name = '<b>'.get_string('modulename', $activity->name).' '.$ai->id.' :</b> '. shorten_text(clean_param($ai->name, PARAM_NOTAGS), 50);
         }
-		echo '</table>';
-    } else {
-		echo get_string('activity_no_instances', 'block_activity_publisher');
-    }
 
-    echo '</td>';
-    echo '</tr>';
+        if ($action == 'publish') {
+            echo '<tr><td><input type="checkbox" id="'.$ai->id.'" name="instance[]"  value="'.$ai->id.'" onchange="check_submit_activity(this)" /> </td><td>'.$name.'</td></tr>';    
+        } else {
+            echo '<tr><td><input type="radio" name="instance[]"  value="'.$ai->id.'" onchange="check_submit_activity(this)" /> </td><td>'.$name.'</td></tr>';
+        }
+        $i++;
+    }
     echo '</table>';
+} else {
+    echo get_string('activity_no_instances', 'block_activity_publisher');
+}
 
-    echo '<div id="download-btn">
-    <input type="hidden" name="course" value="'.$courseid.'" />
-    <input type="hidden" name="mod" value="'.$modid.'" />
-    <input type="hidden" name="what" value="'.$action.'" />
-    <input type="hidden" name="bid" value="'.$blockid.'" />
-    ';
+echo '</td>';
+echo '</tr>';
+echo '</table>';
 
-    if($activity_instances){
-    	$modnamestr = (count($activity_instances) > 1) ?  get_string('modulenameplural', $activity->name) : get_string('modulename', $activity->name) ;
-    	$the = (count($activity_instances) > 1) ?  get_string('theplural', 'block_activity_publisher') : get_string('the', 'block_activity_publisher') ;
-		$actionactivitystr = get_string($action.'_activity','block_activity_publisher', $the.ucfirst($modnamestr));
-    	echo '<input type="submit" name="submitpublish" disabled="disabled" class="submit-disabled" value="'.$actionactivitystr.'" />';
-    }
-    
-    echo '</div>';
-    echo '</div>';
-    echo '</form>';
-    echo '</div>';    
-    
-    echo '<p><hr><center>';
-    $options['id'] = $courseid;
-    echo $OUTPUT->single_button($CFG->wwwroot.'/course/view.php', "Back to Course", get_string('backtocourse', 'block_activity_publisher'));
-	echo '</center></p>';     
-        
-    echo $OUTPUT->footer(); 
+echo '<div id="download-btn">
+<input type="hidden" name="course" value="'.$courseid.'" />
+<input type="hidden" name="mod" value="'.$modid.'" />
+<input type="hidden" name="what" value="'.$action.'" />
+<input type="hidden" name="bid" value="'.$blockid.'" />
+';
 
-?>
+if ($activity_instances) {
+    $modnamestr = (count($activity_instances) > 1) ?  get_string('modulenameplural', $activity->name) : get_string('modulename', $activity->name) ;
+    $the = (count($activity_instances) > 1) ?  get_string('theplural', 'block_activity_publisher') : get_string('the', 'block_activity_publisher') ;
+    $actionactivitystr = get_string($action.'_activity','block_activity_publisher', $the.ucfirst($modnamestr));
+    echo '<input type="submit" name="submitpublish" disabled="disabled" class="submit-disabled" value="'.$actionactivitystr.'" />';
+}
+
+echo '</div>';
+echo '</div>';
+echo '</form>';
+echo '</div>';
+
+echo '<p><hr><center>';
+$options['id'] = $courseid;
+echo $OUTPUT->single_button(new moodle_url('/course/view.php', array('id' => $COURSE->id)), get_string('backtocourse', 'block_activity_publisher'));
+echo '</center></p>';
+
+echo $OUTPUT->footer(); 

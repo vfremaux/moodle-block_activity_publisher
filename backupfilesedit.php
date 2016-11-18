@@ -41,6 +41,7 @@ $filecontext = context::instance_by_id($contextid, IGNORE_MISSING);
 $params = array('currentcontext' => $currentcontext, 'contextid' => $contextid, 'component' => $component, 'filearea' => $filearea);
 $url = new moodle_url('/blocks/activity_publisher/backupfilesedit.php', $params);
 
+// Security.
 require_login($course, false, $cm);
 //require_capability('moodle/restore:uploadfile', $context);
 

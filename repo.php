@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -17,113 +16,113 @@
 
 /**
  * Import backup file or select existing backup file from moodle
- * @package   blocks
- * @subpackage   activity_publisher
+ * @package   block_activity_publisher
+ * @category  blocks
  * @author Wafa Adham <admin@adham.ps>
  * @author Valery Fremaux <valery.fremaux@gmail.com>
  * @copyright 2014 MyLearningFactory & Adham Ltd
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-	require_once('../../config.php');
-	require_once(dirname(__FILE__).'/repo_form.php');
-	require_once($CFG->dirroot.'/backup/util/includes/restore_includes.php');
+require('../../config.php');
+require_once($CFG->dirroot.'/blocks/activity_publisher/repo_form.php');
+require_once($CFG->dirroot.'/backup/util/includes/restore_includes.php');
 
-/// current context
-	$contextid = required_param('contextid', PARAM_INT);
-	$publish = optional_param('publish', null ,PARAM_INT);
-	$filecontextid = optional_param('filecontextid', 0, PARAM_INT);
+// Current context.
+$contextid = required_param('contextid', PARAM_INT);
+$publish = optional_param('publish', null ,PARAM_INT);
+$filecontextid = optional_param('filecontextid', 0, PARAM_INT);
 
-/// action
+// Action.
 
-	$action = optional_param('what', '', PARAM_ALPHA);
+$action = optional_param('what', '', PARAM_ALPHA);
 
 // file parameters
 
-	// non js interface may require these parameters
-	$component  = optional_param('component', null, PARAM_COMPONENT);
-	$filearea   = optional_param('filearea', null, PARAM_AREA);
-	$itemid     = optional_param('itemid', null, PARAM_INT);
-	$filepath   = optional_param('filepath', null, PARAM_PATH);
-	$filename   = optional_param('filename', null, PARAM_FILE);
+// non js interface may require these parameters
+$component  = optional_param('component', null, PARAM_COMPONENT);
+$filearea   = optional_param('filearea', null, PARAM_AREA);
+$itemid     = optional_param('itemid', null, PARAM_INT);
+$filepath   = optional_param('filepath', null, PARAM_PATH);
+$filename   = optional_param('filename', null, PARAM_FILE);
 
-	list($context, $course, $cm) = get_context_info_array($contextid);
-	
-	// will be used when restore
-	if (!empty($filecontextid)) {
-	    $filecontext = context::instance_by_id($filecontextid);
-	}
+list($context, $course, $cm) = get_context_info_array($contextid);
 
-	$url = new moodle_url('/blocks/activity_publisher/repo.php', array('contextid' => $contextid));
-	$heading = get_string('activity_publisher_repo', 'block_activity_publisher');
+// will be used when restore
+if (!empty($filecontextid)) {
+    $filecontext = context::instance_by_id($filecontextid);
+}
 
-	require_login($course, false, $cm);
-	//require_capability('moodle/restore:restorecourse', $context);
+$url = new moodle_url('/blocks/activity_publisher/repo.php', array('contextid' => $contextid));
+$heading = get_string('activity_publisher_repo', 'block_activity_publisher');
 
-	$browser = get_file_browser();
+require_login($course, false, $cm);
+//require_capability('moodle/restore:restorecourse', $context);
 
-	if ($action){
-		include $CFG->dirroot.'/blocks/activity_publisher/repo.controller.php';
-	}
+$browser = get_file_browser();
 
-	$PAGE->set_url($url);
-	$PAGE->set_context($context);
-	$PAGE->set_title(get_string('course') . ': ' . $course->fullname);
-	$PAGE->set_heading($heading);
-	$PAGE->set_pagelayout('admin');
+if ($action){
+    include $CFG->dirroot.'/blocks/activity_publisher/repo.controller.php';
+}
 
-	$form = new activity_restore_form(null, array('contextid' => $contextid));
-	$data = $form->get_data();
-	
-	// check if tmp dir exists
-	$tmpdir = $CFG->tempdir . '/backup';
-	if (!check_dir_exists($tmpdir, true, true)) {
-	    throw new restore_controller_exception('cannot_create_backup_temp_dir');
-	}
+$PAGE->set_url($url);
+$PAGE->set_context($context);
+$PAGE->set_title(get_string('course') . ': ' . $course->fullname);
+$PAGE->set_heading($heading);
+$PAGE->set_pagelayout('admin');
 
-	if ($data && has_capability('moodle/restore:uploadfile', $context)) {
-	    $filename = restore_controller::get_tempdir_name($course->id, $USER->id);
-	    $pathname = $tmpdir . '/' . $filename;
-	    $form->save_file('backupfile', $pathname);
-	    $restore_url = new moodle_url('/backup/restore.php', array('contextid' => $contextid, 'filename' => $filename));
-	    redirect($restore_url);
-	    die;
-	}
+$form = new activity_restore_form(null, array('contextid' => $contextid));
+$data = $form->get_data();
 
-	echo $OUTPUT->header();
+// check if tmp dir exists
+$tmpdir = $CFG->tempdir . '/backup';
+if (!check_dir_exists($tmpdir, true, true)) {
+    throw new restore_controller_exception('cannot_create_backup_temp_dir');
+}
 
-	// require uploadfile cap to use file picker
-	if (has_capability('moodle/restore:uploadfile', $context)) {
-	    echo $OUTPUT->heading(get_string('importfile', 'backup'));
-	    echo $OUTPUT->container_start();
-	    $form->display();
-	    echo $OUTPUT->container_end();
-	}
+if ($data && has_capability('moodle/restore:uploadfile', $context)) {
+    $filename = restore_controller::get_tempdir_name($course->id, $USER->id);
+    $pathname = $tmpdir . '/' . $filename;
+    $form->save_file('backupfile', $pathname);
+    $restore_url = new moodle_url('/backup/restore.php', array('contextid' => $contextid, 'filename' => $filename));
+    redirect($restore_url);
+    die;
+}
 
-	if ($publish == 1){
-		echo $OUTPUT->box_start('success-message');
-	    echo $OUTPUT->notification(get_string('successful', 'block_activity_publisher'));
-		echo $OUTPUT->box_end();
-	} elseif ($publish == -1) {
-		echo $OUTPUT->box_start('success-message');
-	    echo $OUTPUT->notification(get_string('alreadypublished', 'block_activity_publisher'));
-		echo $OUTPUT->box_end();
-	}
+echo $OUTPUT->header();
 
-	if ($context->contextlevel == CONTEXT_BLOCK) {
-	    echo $OUTPUT->heading_with_help(get_string('choosefilefromactivitybackup', 'backup'), 'choosefilefromuserbackup', 'backup');
-	    echo $OUTPUT->container_start();
-	    $treeview_options = array();
-	    $user_context = context_user::instance($USER->id);
-	    $treeview_options['filecontext'] = $context;
-	    $treeview_options['currentcontext'] = $context;
-	    $treeview_options['component']   = 'block_activity_publisher';
-	    $treeview_options['context']     = $context;
-	    $treeview_options['filearea']    = 'activity_backup';
-	  
-	    $renderer = $PAGE->get_renderer('block_activity_publisher');
-	    echo $renderer->backup_files_viewer($treeview_options);
-	    echo $OUTPUT->container_end();
-	}
+// require uploadfile cap to use file picker
+if (has_capability('moodle/restore:uploadfile', $context)) {
+    echo $OUTPUT->heading(get_string('importfile', 'backup'));
+    echo $OUTPUT->container_start();
+    $form->display();
+    echo $OUTPUT->container_end();
+}
 
-	echo $OUTPUT->footer();
+if ($publish == 1) {
+    echo $OUTPUT->box_start('success-message');
+    echo $OUTPUT->notification(get_string('successful', 'block_activity_publisher'));
+    echo $OUTPUT->box_end();
+} else if ($publish == -1) {
+    echo $OUTPUT->box_start('success-message');
+    echo $OUTPUT->notification(get_string('alreadypublished', 'block_activity_publisher'));
+    echo $OUTPUT->box_end();
+}
+
+if ($context->contextlevel == CONTEXT_BLOCK) {
+    echo $OUTPUT->heading_with_help(get_string('choosefilefromactivitybackup', 'backup'), 'choosefilefromuserbackup', 'backup');
+    echo $OUTPUT->container_start();
+    $treeview_options = array();
+    $user_context = context_user::instance($USER->id);
+    $treeview_options['filecontext'] = $context;
+    $treeview_options['currentcontext'] = $context;
+    $treeview_options['component'] = 'block_activity_publisher';
+    $treeview_options['context'] = $context;
+    $treeview_options['filearea'] = 'activity_backup';
+  
+    $renderer = $PAGE->get_renderer('block_activity_publisher');
+    echo $renderer->backup_files_viewer($treeview_options);
+    echo $OUTPUT->container_end();
+}
+
+echo $OUTPUT->footer();
