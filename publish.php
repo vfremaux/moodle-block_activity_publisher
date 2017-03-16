@@ -54,9 +54,7 @@ $out = '';
 if ($fileinfo = $fs->get_file_by_id($fileid)) {
     $result = activity_publisher::publish_file($fileid);
     if ($result == -1) {
-        $out .= $OUTPUT->block_start();
         $out .= $OUTPUT->notification(get_string('alreadypublished', 'block_activity_publisher'));
-        $out .= $OUTPUT->block_end();
     }
 }
 
