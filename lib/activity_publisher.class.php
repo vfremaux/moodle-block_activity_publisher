@@ -86,7 +86,7 @@ class activity_publisher {
 
             $bc->execute_plan();
             $results = $bc->get_results();
-        
+
           //  $outcome = self::outcome_from_results($results);
             $file = $results['backup_destination']; // may be empty if file already moved to target location
 
@@ -101,7 +101,7 @@ class activity_publisher {
 
             // Create the new file record.
             $exported_file = $fs->create_file_from_storedfile($newfile, $file);
-           
+
             // Delete the temp file.
             $fs->delete_area_files($file->get_contextid(), 'backup', 'automated', 0);
             return $exported_file;
@@ -149,7 +149,7 @@ class activity_publisher {
         if (empty($config->unable_mods)) {
             set_config('unable_mods', '', 'block_activity_publisher');
         }
-        $unabled_mods = explode(',', $config->unable_mods);
+        $unabled_mods = explode(',', @$config->unable_mods);
         $modules = self::get_course_mods($course_id);
 
         $select = '<select name="mod" >';
@@ -220,6 +220,7 @@ class activity_publisher {
             // Execute the plan.
             $rc->execute_plan();
         } catch (moodle_exception $e) {
+            assert(1);
         }
 
         $rc->destroy();
@@ -282,7 +283,7 @@ class activity_publisher {
         $mtdstandard = sharedresource_plugin_base::load_mtdstandard($CFG->pluginchoice);
 
         // We can get back some sharedresource internal attributes from metadata
-        $sharedresource_entry = new sharedresource_entry(false); 
+        $sharedresource_entry = new sharedresource_entry(false);
         $sharedresource_entry->title = $backupmetadataelements['1_2:0_0']->value;
         $sharedresource_entry->description = $backupmetadataelements['1_4:0_0']->value;
         $sharedresource_entry->keywords = $backupmetadataelements['1_5:0_0']->value;
