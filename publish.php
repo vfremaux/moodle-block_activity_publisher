@@ -48,19 +48,19 @@ $PAGE->set_context($block_context);
 
 $system_context = context_system::instance();
 
-$fs = get_file_storage(); 
+$fs = get_file_storage();
 $out = '';
 
 if ($fileinfo = $fs->get_file_by_id($fileid)) {
     $result = activity_publisher::publish_file($fileid);
     if ($result == -1) {
-        $out .= $OUTPUT->block_start();
+        $out .= $OUTPUT->box_start();
         $out .= $OUTPUT->notification(get_string('alreadypublished', 'block_activity_publisher'));
-        $out .= $OUTPUT->block_end();
+        $out .= $OUTPUT->box_end();
     }
 }
 
-echo $OUTPUT->header(); 
+echo $OUTPUT->header();
 echo $out;
 echo $OUTPUT->continue_button(new moodle_url('/blocks/activity_publisher/repo.php', array('contextid' => $contextid)));
 echo $OUTPUT->footer();

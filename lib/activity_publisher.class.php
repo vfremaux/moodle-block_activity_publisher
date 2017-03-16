@@ -149,7 +149,7 @@ class activity_publisher {
         if (empty($config->unable_mods)) {
             set_config('unable_mods', '', 'block_activity_publisher');
         }
-        $unabled_mods = explode(',', $config->unable_mods);
+        $unabled_mods = explode(',', @$config->unable_mods);
         $modules = self::get_course_mods($course_id);
 
         $select = '<select name="mod" >';
