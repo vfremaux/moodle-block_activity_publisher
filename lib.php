@@ -57,6 +57,6 @@ function block_activity_publisher_pluginfile($course, $birecord_or_cm, $context,
         $forcedownload = true;
     }
 
-    \core\session\manager::write_close();
+    session_get_instance()->write_close();
     send_stored_file($file, 60 * 60, 0, $forcedownload);
 }
