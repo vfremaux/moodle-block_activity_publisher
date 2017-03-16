@@ -55,7 +55,12 @@ $browser = get_file_browser();
 $data = new stdClass();
 $options = array('subdirs' => 0, 'maxfiles' => -1, 'accepted_types' => '*', 'return_types' => FILE_INTERNAL);
 file_prepare_standard_filemanager($data, 'files', $options, $filecontext, $component, $filearea, 0);
-$params = array('data' => $data, 'contextid' => $contextid, 'currentcontext' => $currentcontext, 'filearea' => $filearea, 'component' => $component, 'returnurl' => $returnurl);
+$params = array('data' => $data,
+                'contextid' => $contextid,
+                'currentcontext' => $currentcontext,
+                'filearea' => $filearea,
+                'component' => $component,
+                'returnurl' => $returnurl);
 $form = new backup_files_edit_form(null, $params);
 
 if ($form->is_cancelled()) {
