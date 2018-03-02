@@ -64,7 +64,8 @@ class block_activity_publisher_renderer extends plugin_renderer_base {
                 continue;
             }
 
-            $fileurl = moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(), null, $file->get_filepath(), $file->get_filename(), true);
+            $fileurl = moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
+                                                       null, $file->get_filepath(), $file->get_filename(), true);
             $params = array();
             $params['what'] = 'choosebackupfile';
             $params['fileid'] = $file->get_id();
@@ -80,12 +81,12 @@ class block_activity_publisher_renderer extends plugin_renderer_base {
             $repourl = new moodle_url('/blocks/activity_publisher/repo.php', $params);
 
             if (activity_publisher::is_ref_published($file->get_contenthash())) {
-                $pix = $OUTPUT->pix_url('published', 'block_activity_publisher');
-               $resource_status = '<img src="'.$pix.'" title="'.get_string('published', 'block_activity_publisher').'" />';
+                $title = get_string('published', 'block_activity_publisher');
+                $resource_status = $OUTPUT->pix_icon('published', $title, 'block_activity_publisher');
             } else {
                 $resource_status = '';
             }
-            
+
             $table->data[] = array(
                 $file->get_filename(),
                 userdate($file->get_timemodified()),
@@ -94,8 +95,8 @@ class block_activity_publisher_renderer extends plugin_renderer_base {
                 html_writer::link($restoreurl, get_string('restore')),
                 html_writer::link($publishurl, get_string('publish','block_activity_publisher')),
                 html_writer::label($resource_status, null),
-                html_writer::link($repourl, '<img src="'.$OUTPUT->pix_url('t/delete').'" />', array('title' => $deletestr)),
-                );
+                html_writer::link($repourl, $OUTPUT->pix_icon('t/delete', $deletestr)),
+            );
         }
 
         $html = html_writer::table($table);
