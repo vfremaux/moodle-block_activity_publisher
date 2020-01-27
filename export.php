@@ -24,11 +24,17 @@
 require('../../config.php');
 require_once($CFG->dirroot.'/blocks/activity_publisher/lib/activity_publisher.class.php');
 
-$modid = required_param('mod',PARAM_INT);
-$blockid = required_param('bid',PARAM_INT);
+$modid = required_param('mod', PARAM_INT);
+$blockid = required_param('bid', PARAM_INT);
 $id = $courseid = required_param('course', PARAM_INT);
-$action = optional_param('what', null,PARAM_TEXT);
+$action = optional_param('what', null, PARAM_TEXT);
 $instances = required_param_array('instance', PARAM_INT);
+
+$params = array('mod' => $modid, 'bid' => $blockid, 'course' => $id, 'what' => $action);
+foreach ($instances as $instance) {
+    $params['instance[]'] = $instance;
+}
+$url = new moodle_url('/blocks/activity_publisher/export.php', $params);
 
 $contextid = context_block::instance($blockid)->id;
 
@@ -46,6 +52,11 @@ require_login($id);
 
 //get course context
 $context = context_course::instance($id);
+
+$PAGE->set_context($context);
+$PAGE->set_url($url);
+
+echo $OUTPUT->header();
 
 echo '<ul>';
 
@@ -76,9 +87,9 @@ $backupfiles = activity_publisher::course_backup_activities($course, $instances,
 
 echo '</ul>';
 
-foreach($backupfiles as $cmid => $bf){
+foreach ($backupfiles as $cmid => $bf) {
     // generic metadata
-    if (is_null($bf)){
+    if (is_null($bf)) {
         continue;
     }
 
@@ -87,95 +98,100 @@ foreach($backupfiles as $cmid => $bf){
 
     $backupmetadataelements = array();
 
-    if (preg_match('/lom/', $CFG->pluginchoice)) {
+    if (is_dir($CFG->dirroot.'/local/sharedresources')) {
 
-        // find here some mapping between moodle objects and some metadata standard defines
-        require_once $CFG->dirroot.'/mod/sharedresource/moodlemetadata.php';
+        if (preg_match('/lom/', $CFG->pluginchoice)) {
 
-        // Title
-        sharedresource_append_metadata_elements($backupmetadataelements, '1_2:0_0', $instance->name, $CFG->pluginchoice);
+            // find here some mapping between moodle objects and some metadata standard defines
+            require_once($CFG->dirroot.'/mod/sharedresource/moodlemetadata.php');
 
-        // Lang
-        $lang = ($course->lang) ? $course->lang : $CFG->lang ;
-        sharedresource_append_metadata_elements($backupmetadataelements, '1_3:0_0', $lang, $CFG->pluginchoice);
+            // Title
+            sharedresource_append_metadata_elements($backupmetadataelements, '1_2:0_0', $instance->name, $CFG->pluginchoice);
 
-        // Description
-        if (isset($instance->description)) {
-            $description = $instance->description;
-        } else if (isset($instance->summary)) {
-            $description = $instance->summary;
-        } else if (isset($instance->intro)) {
-            $description = $instance->intro;
+            // Lang
+            $lang = ($course->lang) ? $course->lang : $CFG->lang ;
+            sharedresource_append_metadata_elements($backupmetadataelements, '1_3:0_0', $lang, $CFG->pluginchoice);
+
+            // Description
+            if (isset($instance->description)) {
+                $description = $instance->description;
+            } else if (isset($instance->summary)) {
+                $description = $instance->summary;
+            } else if (isset($instance->intro)) {
+                $description = $instance->intro;
+            }
+            sharedresource_append_metadata_elements($backupmetadataelements, '1_4:0_0', $description, $CFG->pluginchoice);
+
+            // Keywords
+            sharedresource_append_metadata_elements($backupmetadataelements, '1_5:0_0', $plugininfo->displayname, $CFG->pluginchoice);
+
+            // Structure.
+            sharedresource_append_metadata_elements($backupmetadataelements, '1_7:0_0', 'atomic', $CFG->pluginchoice);
+
+            $adddate = $DB->get_field('course_modules', 'added', array('id' => $cmid));
+            sharedresource_append_author_data($backupmetadataelements, $course->id, $adddate);
+
+            sharedresource_append_metadata_elements($backupmetadataelements, '4_1:0_0', '.mbz', $CFG->pluginchoice);
+            sharedresource_append_metadata_elements($backupmetadataelements, '4_2:0_0', $bf->get_filesize(), $CFG->pluginchoice);
+            $sharedurl = new moodle_url('/mod/sharedresource/view.php', array('identifier' => $bf->get_contenthash()));
+            sharedresource_append_metadata_elements($backupmetadataelements, '4_3:0_0', $sharedurl, $CFG->pluginchoice);
+            sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_1:0_0_0_0', 'application', $CFG->pluginchoice);
+            sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_2:0_0_0_0', 'moodle', $CFG->pluginchoice);
+            sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_3:0_0_0_0', $CFG->version, $CFG->pluginchoice);
+            sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_4:0_0_0_0', $CFG->version, $CFG->pluginchoice);
+            sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_1:0_0_1_0', 'module', $CFG->pluginchoice);
+            sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_2:0_0_1_0', $plugininfo->name, $CFG->pluginchoice);
+            sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_3:0_0_1_0', $plugininfo->versiondb, $CFG->pluginchoice);
+            sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_4:0_0_1_0', $plugininfo->versiondb, $CFG->pluginchoice);
+
+            sharedresource_append_metadata_elements($backupmetadataelements, '4_5:0_0', get_string('installation', 'block_activity_publisher', get_string('pluginname', $module->name)), $CFG->pluginchoice);
+            sharedresource_append_metadata_elements($backupmetadataelements, '4_6:0_0', get_string('platformrequirement', 'block_activity_publisher'), $CFG->pluginchoice);
+
+            if (in_array($module->name, array('resource', 'sharedresource', 'directory', 'label', 'customlabel'))){
+                sharedresource_append_metadata_elements($backupmetadataelements, '5_1:0_0', 'expositive', $CFG->pluginchoice);
+            } else if (in_array($module->name, array('url'))){
+                sharedresource_append_metadata_elements($backupmetadataelements, '5_1:0_0', 'mixed', $CFG->pluginchoice);
+            } else {
+                sharedresource_append_metadata_elements($backupmetadataelements, '5_1:0_0', 'active', $CFG->pluginchoice);
+            }
+            if (array_key_exists($module->name, $MODRESOURCETYPES)){
+                sharedresource_append_metadata_elements($backupmetadataelements, '5_2:0_0', $MODRESOURCETYPES[$module->name], $CFG->pluginchoice);
+            }
+            if (array_key_exists($module->name, $MODINTERACTIVITYLEVELS)){
+                sharedresource_append_metadata_elements($backupmetadataelements, '5_3:0_0', $MODINTERACTIVITYLEVELS[$module->name], $CFG->pluginchoice);
+            }
+            if (array_key_exists($module->name, $MODSEMANTICDENSITIES)){
+                sharedresource_append_metadata_elements($backupmetadataelements, '5_4:0_0', $MODSEMANTICDENSITIES[$module->name], $CFG->pluginchoice);
+            }
+            sharedresource_append_metadata_elements($backupmetadataelements, '5_5:0_0', 'learner', $CFG->pluginchoice);
         }
-        sharedresource_append_metadata_elements($backupmetadataelements, '1_4:0_0', $description, $CFG->pluginchoice);
 
-        // Keywords
-        sharedresource_append_metadata_elements($backupmetadataelements, '1_5:0_0', $plugininfo->displayname, $CFG->pluginchoice);
-
-        // Structure.
-        sharedresource_append_metadata_elements($backupmetadataelements, '1_7:0_0', 'atomic', $CFG->pluginchoice);
-
-        $adddate = $DB->get_field('course_modules', 'added', array('id' => $cmid));
-        sharedresource_append_author_data($backupmetadataelements, $course->id, $adddate);
-
-        sharedresource_append_metadata_elements($backupmetadataelements, '4_1:0_0', '.mbz', $CFG->pluginchoice);
-        sharedresource_append_metadata_elements($backupmetadataelements, '4_2:0_0', $bf->get_filesize(), $CFG->pluginchoice);
-        $sharedurl = new moodle_url('/mod/sharedresource/view.php', array('identifier' => $bf->get_contenthash()));
-        sharedresource_append_metadata_elements($backupmetadataelements, '4_3:0_0', $sharedurl, $CFG->pluginchoice);
-        sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_1:0_0_0_0', 'application', $CFG->pluginchoice);
-        sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_2:0_0_0_0', 'moodle', $CFG->pluginchoice);
-        sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_3:0_0_0_0', $CFG->version, $CFG->pluginchoice);
-        sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_4:0_0_0_0', $CFG->version, $CFG->pluginchoice);
-        sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_1:0_0_1_0', 'module', $CFG->pluginchoice);
-        sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_2:0_0_1_0', $plugininfo->name, $CFG->pluginchoice);
-        sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_3:0_0_1_0', $plugininfo->versiondb, $CFG->pluginchoice);
-        sharedresource_append_metadata_elements($backupmetadataelements, '4_4_1_4:0_0_1_0', $plugininfo->versiondb, $CFG->pluginchoice);
-
-        sharedresource_append_metadata_elements($backupmetadataelements, '4_5:0_0', get_string('installation', 'block_activity_publisher', get_string('pluginname', $module->name)), $CFG->pluginchoice);
-        sharedresource_append_metadata_elements($backupmetadataelements, '4_6:0_0', get_string('platformrequirement', 'block_activity_publisher'), $CFG->pluginchoice);
-
-        if (in_array($module->name, array('resource', 'sharedresource', 'directory', 'label', 'customlabel'))){
-            sharedresource_append_metadata_elements($backupmetadataelements, '5_1:0_0', 'expositive', $CFG->pluginchoice);
-        } else if (in_array($module->name, array('url'))){
-            sharedresource_append_metadata_elements($backupmetadataelements, '5_1:0_0', 'mixed', $CFG->pluginchoice);
-        } else {
-            sharedresource_append_metadata_elements($backupmetadataelements, '5_1:0_0', 'active', $CFG->pluginchoice);
+        if (preg_match('/lomfr/', $CFG->pluginchoice)){
+            if (array_key_exists($module->name, $MODDOCUMENTTYPES)){
+                sharedresource_append_metadata_elements($backupmetadataelements, '1_9:0_0', $MODDOCUMENTTYPES[$module->name], $CFG->pluginchoice);
+            }
+            if (array_key_exists($module->name, $MODLEARNINGACTIVITIES)){
+                sharedresource_append_metadata_elements($backupmetadataelements, '5_12:0_0', $MODLEARNINGACTIVITIES[$module->name], $CFG->pluginchoice);
+            }
         }
-        if (array_key_exists($module->name, $MODRESOURCETYPES)){
-            sharedresource_append_metadata_elements($backupmetadataelements, '5_2:0_0', $MODRESOURCETYPES[$module->name], $CFG->pluginchoice);
+
+        if (preg_match('/scolomfr/', $CFG->pluginchoice)) {
+            if (array_key_exists($module->name, $MODGENERALDOCUMENTTYPES)) {
+                sharedresource_append_metadata_elements($backupmetadataelements, '1_10:0_0', $MODGENERALDOCUMENTTYPES[$module->name], $CFG->pluginchoice);
+            }
         }
-        if (array_key_exists($module->name, $MODINTERACTIVITYLEVELS)){
-            sharedresource_append_metadata_elements($backupmetadataelements, '5_3:0_0', $MODINTERACTIVITYLEVELS[$module->name], $CFG->pluginchoice);
-        }
-        if (array_key_exists($module->name, $MODSEMANTICDENSITIES)){
-            sharedresource_append_metadata_elements($backupmetadataelements, '5_4:0_0', $MODSEMANTICDENSITIES[$module->name], $CFG->pluginchoice);
-        }
-        sharedresource_append_metadata_elements($backupmetadataelements, '5_5:0_0', 'learner', $CFG->pluginchoice);
+
+        // store metadata in field "source". this will be used at "publish time"
+        $bf->set_source(base64_encode(serialize($backupmetadataelements)));
     }
-
-    if (preg_match('/lomfr/', $CFG->pluginchoice)){
-        if (array_key_exists($module->name, $MODDOCUMENTTYPES)){
-            sharedresource_append_metadata_elements($backupmetadataelements, '1_9:0_0', $MODDOCUMENTTYPES[$module->name], $CFG->pluginchoice);
-        }
-        if (array_key_exists($module->name, $MODLEARNINGACTIVITIES)){
-            sharedresource_append_metadata_elements($backupmetadataelements, '5_12:0_0', $MODLEARNINGACTIVITIES[$module->name], $CFG->pluginchoice);
-        }
-    }
-
-    if (preg_match('/scolomfr/', $CFG->pluginchoice)) {
-        if (array_key_exists($module->name, $MODGENERALDOCUMENTTYPES)) {
-            sharedresource_append_metadata_elements($backupmetadataelements, '1_10:0_0', $MODGENERALDOCUMENTTYPES[$module->name], $CFG->pluginchoice);
-        }
-    }
-
-    // store metadata in field "source". this will be used at "publish time"
-    $bf->set_source(base64_encode(serialize($backupmetadataelements)));
 }
 
 // finalize
 
 if ($action == 'publish') {
-    redirect(new moodle_url('/blocks/activity_publisher/repo.php', array('contextid' => $contextid)));
+    echo $OUTPUT->continue_button(new moodle_url('/blocks/activity_publisher/repo.php', array('contextid' => $contextid)));
+    echo $OUTPUT->footer();
+    die;
 } 
 
 /*
@@ -188,7 +204,7 @@ if ($action == 'share'){
     $singlecoursemod = array_pop($instances);
     $cm = $DB->get_record('course_modules', array('id' => $singlecoursemod));
     $instance = $DB->get_record($module->name, array('id' => $cm->instance));
-    
+
     // we make a shared resource entry, put it in session and invoke metadataform to finish indexation
     require_once($CFG->dirroot.'/mod/sharedresource/sharedresource_entry.class.php');
     require_once($CFG->dirroot.'/mod/sharedresource/sharedresource_metadata.class.php');
@@ -238,4 +254,4 @@ if ($action == 'share'){
 */
 
 // if we reach this point, we are in error
-throw(new CodingException('Code should never reach this point'));
+throw(new coding_exception('Code should never reach this point'));

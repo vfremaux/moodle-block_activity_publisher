@@ -1,0 +1,36 @@
+
+
+<!-- block_activity_publisher -->
+<div id="content-cont">
+
+    <h3>{{#str}}pluginname, block_activity_publisher{{/str}}</h3>
+
+    <div id="summary-cont">
+        <div id="title">{{#str}}import, block_activity_publisher{{/str}}</div>
+
+        <form enctype="multipart/form-data" method="post" action="import.php">
+        <table id="summary-table" cellpadding="5" cellspacing="5">
+
+            <tr>
+                <td class="title">{{#str}}coursename, block_activity_publisher{{/str}}</td>
+                <td>{{fullname}}</td>
+            </tr>
+
+            <tr>
+                <td class="title">{{#str}}selectone, block_activity_publisher{{/str}}</td>
+                <td>
+                    <input type="file" name="upfile" id="upfile" />
+                </td>
+            </tr>
+        </table>
+
+        <div id="download-btn">
+
+            <input type="hidden" value="{{courseid}}" name="cid" />
+            <input type="submit" value="Import" />
+        </div>
+
+        </form>
+    </div>
+</div>
+<!-- /block_activity_publisher -->

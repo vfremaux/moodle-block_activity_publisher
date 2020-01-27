@@ -110,6 +110,57 @@ class block_activity_publisher_renderer extends plugin_renderer_base {
 
         return $html;
     }
+
+    public function summary($course, $activity, $instances) {
+
+        $modid = required_param('mod',PARAM_INT);
+        $blockid = required_param('bid', PARAM_INT);
+        $action = optional_param('what', '', PARAM_TEXT);
+
+        $template = new StdClass;
+        $template->fullname = format_string($course->fullname);
+        $template->courseid = $course->id;
+        $template->modid = $modid;
+        $template->blockid = $blockid;
+        $template->action = $action;
+        $template->activityname = format_string($activity->name);
+        $template->hasinstances = false;
+        $template->publish = ($action == 'publish');
+
+        if (!empty($instances)) {
+
+            foreach ($instances as $ai) {
+                $activitytpl = new StdClass;
+                if ($activity->name == 'label') {
+                    continue;
+                } else {
+                    $activitytpl->modname = get_string('modulename', $activity->name);
+                    $activitytpl->id = $ai->id;
+                    $activitytpl->instancename = shorten_text(clean_param(format_string($ai->name), PARAM_NOTAGS), 50);
+                }
+                $template->instances[] = $activitytpl;
+                $template->hasinstances = true;
+            }
+        }
+
+        $modnamestr = (count($instances) > 1) ?  get_string('modulenameplural', $activity->name) : get_string('modulename', $activity->name) ;
+        $the = (count($instances) > 1) ?  get_string('theplural', 'block_activity_publisher') : get_string('the', 'block_activity_publisher') ;
+        $template->actionactivitystr = get_string($action.'_activity', 'block_activity_publisher', $the.ucfirst($modnamestr));
+
+        $options['id'] = $course->id;
+        $returnurl = new moodle_url('/course/view.php', array('id' => $course->id));
+        $buttonstr = get_string('backtocourse', 'block_activity_publisher');
+        $template->backtocoursebutton = $this->output->single_button($returnurl, $buttonstr);
+
+        return $this->output->render_from_template('block_activity_publisher/summary', $template);
+    }
+
+    public function importsummary($course) {
+        $template = new Stdclass;
+        $template->fullname = $course->fullname;
+        $template->courseid = $course->id;
+        return $this->output->export_from_template('block_activity_publisher/summary', $template);
+    }
 }
 
 /**

@@ -276,24 +276,21 @@ class activity_publisher {
         $backupmetadataelements = unserialize(base64_decode($draftfile->get_source()));
 
         // We make a shared resource entry, put it in session and invoke metadataform to finish indexation.
-        require_once($CFG->dirroot.'/mod/sharedresource/sharedresource_entry.class.php');
-        require_once($CFG->dirroot.'/mod/sharedresource/sharedresource_metadata.class.php');
+        require_once($CFG->dirroot.'/mod/sharedresource/classes/sharedresource_entry.class.php');
+        require_once($CFG->dirroot.'/mod/sharedresource/classes/sharedresource_metadata.class.php');
         require_once($CFG->dirroot.'/mod/sharedresource/lib.php');
 
-        $mtdstandard = sharedresource_plugin_base::load_mtdstandard($CFG->pluginchoice);
+        $mtdstandard = sharedresource_get_plugin($CFG->pluginchoice);
 
         // We can get back some sharedresource internal attributes from metadata
-        $sharedresource_entry = new sharedresource_entry(false);
+        $sharedresource_entry = new \mod_sharedresource\entry(false);
         $sharedresource_entry->title = $backupmetadataelements['1_2:0_0']->value;
         $sharedresource_entry->description = $backupmetadataelements['1_4:0_0']->value;
         $sharedresource_entry->keywords = $backupmetadataelements['1_5:0_0']->value;
         $sharedresource_entry->type = 'file';
         $sharedresource_entry->identifier = $draftfile->get_contenthash();
         $sharedresource_entry->file = $draftfile->get_id();
-        $tempfilename = $draftfile->get_filepath().$draftfile->get_filename();
-        if (function_exists('mime_content_type')) {
-            $sharedresource_entry->mimetype = mime_content_type($tempfilename);
-        }
+        $sharedresource_entry->mimetype = $draftfile->get_mimetype();
         $sharedresource_entry->url = '';
         // do not record instance yet, rely on metadataform output to do it properly
         // if (!record_exists('sharedresource_entry', 'identifier', $sharedresource_entry->identifier)){
@@ -314,7 +311,7 @@ class activity_publisher {
                         'mode' => $mode,
                         'context' => $sharingcontext);
 
-        $fullurl = new moodle_url('/mod/sharedresource/metadataform.php', $params);
+        $fullurl = new moodle_url('/mod/sharedresource/forms/metadata_form.php', $params);
         redirect($fullurl);
     }
 
@@ -339,7 +336,12 @@ class activity_publisher {
      * @param string $contenthash an MD5 hash characteristic of the resource content
      */
     public static function is_ref_published($contenthash) {
-        global $DB;
+        global $DB, $CFG;
+
+        if (!is_dir($CFG->dirroot.'/local/sharedresources')) {
+            // Deflect if sharedresource not even installed.
+            return 0;
+        }
 
         if ($DB->record_exists('sharedresource_entry', array('identifier' => $contenthash))) {
             return 1;

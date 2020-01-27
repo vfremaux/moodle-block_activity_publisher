@@ -1,0 +1,73 @@
+
+
+
+<!-- block_activity_publisher/summary -->
+
+<h1>{{#str}}chooseactivities, block_activity_publisher{{/str}}</h1>
+
+<div id="content-cont">
+<form name="exportactivityform" method="post" action="export.php">
+    <div id="summary-cont">
+        <div id="title">{{#str}}summary, block_activity_publisher{{/str}}</div>
+
+        <table id="summary-table" cellpadding="5" cellspacing="5" width="100%">
+
+            <tr>
+                <td class="title">{{#str}}course_name, block_activity_publisher{{/str}}</td>
+                <td>{{fullname}}</td>
+            </tr>
+
+            <tr>
+                <td class="title">{{#str}}activity_type, block_activity_publisher{{/str}}</td>
+                <td>{{activityname}}</td>
+            </tr>
+
+            <tr>
+                <td class="title" valign="top">{{#str}}activity_instances, block_activity_publisher{{/str}}</td>
+                <td>
+
+                {{#hasinstances}}
+                    <table width="100%">
+                    {{#instances}}
+                        <tr>
+                            <td>
+                                <b>{{modname}} {{id}} :</b> {{instancename}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                        {{#publish}}
+                                <input type="checkbox" id="{{id}}" name="instance[]" value="{{id}}" onchange="check_submit_activity(this)" />
+                        {{/publish}}
+                        {{^publish}}
+                                <input type="radio" name="instance[]" value="{{id}}" onchange="check_submit_activity(this)" />
+                        {{/publish}}
+                            </td>
+                            <td>{{name}}</td>
+                        </tr>
+                    {{/instances}}
+                    </table>
+                {{/hasinstances}}
+                {{^hasinstances}}
+                {{#str}}activity_no_instances, block_activity_publisher{{/str}}
+                {{/hasinstances}}
+                </td>
+            </tr>
+        </table>
+
+        <div id="download-btn">
+            <input type="hidden" name="course" value="{{courseid}}" />
+            <input type="hidden" name="mod" value="{{modid}}" />
+            <input type="hidden" name="what" value="{{action}}" />
+            <input type="hidden" name="bid" value="{{blockid}}" />
+
+            {{#hasinstances}}
+            <input type="submit" name="submitpublish" disabled="disabled" class="submit-disabled" value="{{actionactivitystr}}" />';
+            {{/hasinstances}}
+        </div>
+    </div>
+</form>
+</div>
+
+<p><hr><center>{{{backtocoursebutton}}}</center></p>
+<!-- /block_activity_publisher/summary -->
