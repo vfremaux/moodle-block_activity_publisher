@@ -15,54 +15,30 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
-* import summery page, first step page in the activity import process.
+* import summary page, first step page in the activity import process.
 * @author Wafa Adham, Adham Inc.
 * @version 1.0
 */
 
 require('../../config.php');
 
-$course_id = required_param('course',PARAM_INT); 
+$courseid = required_param('course', PARAM_INT);
 
-if (!$course = $DB->get_record('course', array('id' => $course_id))) {
+if (!$course = $DB->get_record('course', array('id' => $courseid))) {
     print_error('coursemisconf');
 }
 
-require_login($course_id);
+$context = context_course::instance($courseid);
 
-if (! $site = get_site()) {
-    redirect(new moodle_url('/admin/index.php'));
-}
+$url = new moodle_url('/blocks/activity_publisher/summary.php', array('id' => $course->id));
+$PAGE->set_context($context);
+$PAGE->set_url($url);
+
+$renderer = $PAGE->get_renderer('block_activity_publisher');
+
+require_login($courseid);
+require_capablity('block/activity_publisher:publish', $context);
 
 echo $OUTPUT->header();
-echo '<div id="content-cont">';
-
-echo $OUTPUT->heading(get_string('pluginname', 'block_activity_publisher'));
-echo '<div id="summary-cont">';
-echo '<div id="title">'.get_string('import', 'block_activity_publisher').'</div>';
-
-echo '<form enctype="multipart/form-data" method="post" action="import.php">
-<table id="summary-table" cellpadding="5" cellspacing="5">';
-
-echo '<tr>';
-echo '<td class="title">'.get_string('coursename', 'block_activity_publisher').'</td>';
-echo '<td>'.$course->fullname.'</td>';
-echo '</tr>';
-
-echo '<tr>';
-echo '<td class="title">Select Activity :</td>';
-echo '<td><input type="file" name="upfile" id="upfile" /></td>';
-echo '</tr>';
-echo '</table>';
-
-echo '<div id="download-btn">';
-
-echo '<input type="hidden" value="'.$course_id.'" name="cid"/><input type="submit" value="Import" />';
-
-echo '</form></div>';
-
-echo '</div>';
-
-print('</div>');
-
-$OUTPUT->print_footer();
+echo $renderer->importsummary($course);
+echo $OUTPUT->print_footer();

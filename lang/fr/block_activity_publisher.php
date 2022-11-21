@@ -67,3 +67,4 @@ $string['summarytitle'] = 'Exportation d\'activités';
 $string['the']  = ' ce ';
 $string['theplural']  = ' ces ';
 $string['chooseactivities'] = 'Choisir les activités à exporter';
+$string['selectone'] = 'Choisir une instance';

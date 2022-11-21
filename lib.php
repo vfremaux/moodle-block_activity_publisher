@@ -17,7 +17,7 @@
 /**
  * @package   block_activity_publisher
  * @category  blocks
- * @copyright 2010 Dongsheng Cai <dongsheng@moodle.com>
+ * @copyright 2010 wafa adham <admin@adham.ps>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die;
@@ -40,7 +40,7 @@ function block_activity_publisher_pluginfile($course, $birecord_or_cm, $context,
     $filename = array_pop($args);
     $filepath = $args ? '/'.implode('/', $args).'/' : '/';
 
-    if (!$file = $fs->get_file($context->id, 'block_activity_publisher', 'activity_backup', 0, $filepath, $filename) or $file->is_directory()) {
+    if ((!$file = $fs->get_file($context->id, 'block_activity_publisher', 'activity_backup', 0, $filepath, $filename)) or $file->is_directory()) {
         send_file_not_found();
     }
 
@@ -57,6 +57,6 @@ function block_activity_publisher_pluginfile($course, $birecord_or_cm, $context,
         $forcedownload = true;
     }
 
-    session_get_instance()->write_close();
+    \core\session\manager::write_close();
     send_stored_file($file, 60 * 60, 0, $forcedownload);
 }

@@ -50,7 +50,7 @@ class block_activity_publisher extends block_base {
 
             require_once($CFG->dirroot.'/blocks/activity_publisher/lib/activity_publisher.class.php');
 
-            if ($this->content !== NULL) {
+            if ($this->content !== null) {
                 return $this->content;
             }
 

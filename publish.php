@@ -29,7 +29,7 @@ $courseid = required_param('course', PARAM_INT);
 $fileid = optional_param('fileid', null, PARAM_INT);
 $sharingcontext = optional_param('sharingcontext', null, PARAM_INT);
 
-$block_context = context::instance_by_id($contextid);
+$context = context::instance_by_id($contextid);
 
 // Security.
 
@@ -38,17 +38,18 @@ if (!$course = $DB->get_record('course', array('id' => $courseid))){
 }
 
 require_course_login($course);
+require_capability('block/activity_publisher:publish', $context);
 
 // Header and page start.
 
 $url = new moodle_url('/blocks/activity_publisher/publish.php');
 $PAGE->set_url($url);
 $PAGE->set_pagelayout('standard');
-$PAGE->set_context($block_context);
+$PAGE->set_context($context);
 
 $system_context = context_system::instance();
 
-$fs = get_file_storage(); 
+$fs = get_file_storage();
 $out = '';
 
 if ($fileinfo = $fs->get_file_by_id($fileid)) {
@@ -60,5 +61,5 @@ if ($fileinfo = $fs->get_file_by_id($fileid)) {
 
 echo $OUTPUT->header(); 
 echo $out;
-echo $OUTPUT->continue_button(new moodle_url('/blocks/activity_publisher/repo.php', array('contextid' => $contextid)));
+echo $OUTPUT->continue_button(new moodle_url('/blocks/activity_publisher/repo.php', array('contextid' => $context->id)));
 echo $OUTPUT->footer();
