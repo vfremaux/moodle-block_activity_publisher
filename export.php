@@ -60,15 +60,9 @@ echo $OUTPUT->header();
 
 echo '<ul>';
 
-if(!defined('BACKUP_SILENTLY')){
+// if (!defined('BACKUP_SILENTLY')) {
     $checkingstr = get_string('checkingconfiguration', 'block_activity_publisher');
-    print("<li>$checkingstr...</li>");
-}
-
-if(!defined('BACKUP_SILENTLY')) {  
-    $startingstr = get_string('startingbackup', 'block_activity_publisher');
-    print("<li>$startingstr</li>") ;
-}
+    echo "<li>$checkingstr...</li>";
  
 //clean up backup pref 
 unset ($SESSION->backupprefs);
@@ -79,10 +73,13 @@ $pluginmanager = core_plugin_manager::instance();
 $plugininfo = $pluginmanager->get_plugin_info('mod_'.$module->name);
 
 if (empty($plugininfo)) {
-    print_error(get_string('errorplugin', 'block_activity_publisher'));
+    throw new moodle_exception('errorplugin', 'block_activity_publisher');
 }
 
-//we have all the infos , now we start
+    $startingstr = get_string('startingbackup', 'block_activity_publisher');
+    echo "<li>$startingstr</li>";
+
+// We have all the infos , now we start.
 $backupfiles = activity_publisher::course_backup_activities($course, $instances, $blockid);
 
 echo '</ul>';
@@ -189,7 +186,7 @@ foreach ($backupfiles as $cmid => $bf) {
 // finalize
 
 if ($action == 'publish') {
-    echo $OUTPUT->continue_button(new moodle_url('/blocks/activity_publisher/repo.php', array('contextid' => $contextid)));
+    echo $OUTPUT->continue_button(new moodle_url('/blocks/activity_publisher/repo.php', ['contextid' => $contextid]));
     echo $OUTPUT->footer();
     die;
 } 

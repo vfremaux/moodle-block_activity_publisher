@@ -32,10 +32,38 @@ class block_activity_publisher extends block_base {
         return array('all' => false, 'course-view' => true, 'my' => false);
     }
 
+    /**
+     * Does the block have global config ?
+     */
+    public function has_config() {
+        return true;
+    }
+
+    /**
+     * Does the block have instance config ?
+     */
+    public function instance_allow_config() {
+        return true;
+    }
+
     public function instance_allow_multiple() {
         return false;
     }
 
+    /**
+     * Standard specialization.
+     */
+    public function specialization() {
+        if (!empty($this->config)) {
+            if (!empty($this->config->title)) {
+                $this->title = format_string($this->config->title);
+            }
+        }
+    }
+
+    /**
+     * Main block content
+     */
     public function get_content() {
         global $CFG, $USER, $COURSE;
 

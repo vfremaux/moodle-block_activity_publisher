@@ -38,7 +38,7 @@ class activity_publisher {
      * return the link for the generated export file ,if the function is givven a comma seperated instances 
      * ids then all are packed in the same file, in all cases the function generate 1 export package file.
      */
-    public static function backup_single_module($course, $cmid,$blockid) {
+    public static function backup_single_module($course, $cmid, $blockid) {
         global $CFG, $preferences, $SESSION, $DB, $USER;
 
         // Just a random.
@@ -49,14 +49,14 @@ class activity_publisher {
             $type = backup::TYPE_1ACTIVITY;
             $id = $cmid;
         }
-       
+
         if (!($bc = backup_ui::load_controller($backupid))) {
             $bc = new backup_controller($type, $id, backup::FORMAT_MOODLE,
-                                    backup::INTERACTIVE_NO, backup::MODE_AUTOMATED, $USER->id);
+                                    backup::INTERACTIVE_NO, backup::MODE_GENERAL, $USER->id);
         }
 
         try {
-            $settings = array(
+            $settings = [
                 'users' => 'backup_auto_users',
                 'role_assignments' => 'backup_auto_role_assignments',
                 'activities' => 'backup_auto_activities',
@@ -66,11 +66,14 @@ class activity_publisher {
                 'completion_information' => 'backup_auto_userscompletion',
                 'logs' => 'backup_auto_logs',
                 'histories' => 'backup_auto_histories'
-            );
+            ];
             foreach ($settings as $setting => $configsetting) {
+                $bc->get_plan()->get_setting('activities')->set_value(true);
+                /*
                 if ($bc->get_plan()->setting_exists($setting)) {
-                 //   $bc->get_plan()->get_setting($setting)->set_value($config->{$configsetting});
+                    $bc->get_plan()->get_setting($setting)->set_value($config->{$configsetting});
                 }
+                */
             }
 
             // Set the default filename
@@ -87,7 +90,6 @@ class activity_publisher {
             $bc->execute_plan();
             $results = $bc->get_results();
 
-          //  $outcome = self::outcome_from_results($results);
             $file = $results['backup_destination']; // may be empty if file already moved to target location
 
             //next we need to copy the file to the right file space .
@@ -127,7 +129,7 @@ class activity_publisher {
      */
     public static function course_backup_activities($course, $cmids, $blockid) {
 
-        $backup_files = array();
+        $backup_files = [];
         foreach ($cmids as $cmid) {
              $backup_files[$cmid] = self::backup_single_module($course, $cmid, $blockid);
         }
@@ -149,14 +151,14 @@ class activity_publisher {
         if (empty($config->unable_mods)) {
             set_config('unable_mods', '', 'block_activity_publisher');
         }
-        $unabled_mods = explode(',', @$config->unable_mods);
+        $unabledmods = explode(',', $config->unable_mods ?? '');
         $modules = self::get_course_mods($course_id);
 
         $select = '<select name="mod" >';
 
         if ( $modules &&  (count($modules) > 0)) {
             foreach ($modules as $mod) {
-                if (!in_array($mod->name, $unabled_mods)) {
+                if (!in_array($mod->name, $unabledmods)) {
                     $select .= "<option value='" . $mod->id . "'>" . get_string('modulename', $mod->name) . "</options>";
                 }
             }
@@ -170,7 +172,11 @@ class activity_publisher {
         return $select;
     }
 
-    public static function get_course_mods($course_id) {
+    /**
+     * Get course modules
+     * @paam int $courseid
+     */
+    public static function get_course_mods($courseid) {
         global $CFG, $DB;
 
         $query = "
@@ -179,14 +185,14 @@ class activity_publisher {
                 m.name,
                 m.id as id
             FROM
-                {$CFG->prefix}course_modules cm,
-                {$CFG->prefix}modules m
+                {course_modules} cm,
+                {modules} m
             WHERE
                 cm.module = m.id AND
-                cm.course = {$course_id}
+                cm.course = ?
         ";
 
-        $modules = $DB->get_records_sql($query);
+        $modules = $DB->get_records_sql($query, [$courseid]);
 
         return $modules;
     }
@@ -276,9 +282,9 @@ class activity_publisher {
         $backupmetadataelements = unserialize(base64_decode($draftfile->get_source()));
 
         // We make a shared resource entry, put it in session and invoke metadataform to finish indexation.
-        require_once($CFG->dirroot.'/mod/sharedresource/classes/sharedresource_entry.class.php');
-        require_once($CFG->dirroot.'/mod/sharedresource/classes/sharedresource_metadata.class.php');
-        require_once($CFG->dirroot.'/mod/sharedresource/lib.php');
+        include_once($CFG->dirroot.'/mod/sharedresource/classes/sharedresource_entry.class.php');
+        include_once($CFG->dirroot.'/mod/sharedresource/classes/sharedresource_metadata.class.php');
+        include_once($CFG->dirroot.'/mod/sharedresource/lib.php');
 
         $mtdstandard = sharedresource_get_plugin($CFG->pluginchoice);
 
@@ -292,10 +298,6 @@ class activity_publisher {
         $sharedresource_entry->file = $draftfile->get_id();
         $sharedresource_entry->mimetype = $draftfile->get_mimetype();
         $sharedresource_entry->url = '';
-        // do not record instance yet, rely on metadataform output to do it properly
-        // if (!record_exists('sharedresource_entry', 'identifier', $sharedresource_entry->identifier)){
-            // $sharedresource_entry->add_instance();
-        // }
 
         foreach ($backupmetadataelements as $elm) {
             $sharedresource_entry->add_element($elm->name, $elm->value, $elm->plugin);
@@ -303,21 +305,28 @@ class activity_publisher {
 
         $SESSION->sr_entry = serialize($sharedresource_entry);
 
-        $params = array('course' => $COURSE->id,
-                        'section' => 0,
-                        'type' => 'file',
-                        'add' => 'sharedresource',
-                        'return' => $return,
-                        'mode' => $mode,
-                        'context' => $sharingcontext);
+        $params = [
+            'course' => $COURSE->id,
+            'section' => 0,
+            'type' => 'file',
+            'add' => 'sharedresource',
+            'return' => $return,
+            'mode' => $mode,
+            'context' => $sharingcontext,
+        ];
 
         $fullurl = new moodle_url('/mod/sharedresource/forms/metadata_form.php', $params);
         redirect($fullurl);
     }
 
     /**
-     * checks if file is already published in the library
-     *
+     * Checks if file is already published in the library
+     * @param int $filecontextid
+     * @param string $component
+     * @param string $filearea
+     * @param int $itemid
+     * @param string $filepath
+     * @param string $filename
      */
     public static function is_file_published($filecontextid, $component, $filearea, $itemid, $filepath, $filename) {
 
@@ -343,7 +352,7 @@ class activity_publisher {
             return 0;
         }
 
-        if ($DB->record_exists('sharedresource_entry', array('identifier' => $contenthash))) {
+        if ($DB->record_exists('sharedresource_entry', ['identifier' => $contenthash])) {
             return 1;
         } else {
             return 0;

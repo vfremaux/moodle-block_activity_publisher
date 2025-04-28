@@ -37,9 +37,8 @@ class block_activity_publisher_edit_form extends block_edit_form {
         // Fields for editing HTML block title and contents.
         $mform->addElement('header', 'configheader', get_string('blocksettings', 'block'));
 
-        $mform->addElement('text', 'config_title', get_string('blocktitle', 'blog'));
-        $mform->setDefault('config_title', get_string('blogtags', 'blog'));
-        $mform->setType('config_title', PARAM_TEXT);
+        $mform->addElement('text', 'config_title', get_string('configtitle', 'block_activity_publisher'));
+        $mform->setType('config_title', PARAM_MULTILANG);
 
     }
 }
